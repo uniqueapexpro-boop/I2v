@@ -1,730 +1,481 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to Video Builder</title>
-    
-    <!-- Tailwind CSS for styling -->
+    <title>Pro Video Maker - Audio, Transitions & Captions</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        
-        .file-list-item {
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .file-list-item:hover {
-            background-color: #f3f4f6;
-            transform: translateX(2px);
-        }
-
-        /* Custom scrollbar for better look */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-
-        /* Animation for loading spinner */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-            animation: spin 2s linear infinite;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 p-4 md:p-8">
-
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Header Section (Spans full width) -->
-        <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-6 mb-2 flex items-center justify-between border-t-4 border-indigo-600">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-film text-indigo-600"></i>
-                    Img2Vid Creator
-                </h1>
-                <p class="text-slate-500 mt-1">Convert your images into a video sequence right in your browser.</p>
-            </div>
-            <div class="hidden md:block">
-                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-3 py-1 rounded-full border border-indigo-200">
-                    <i class="fa-solid fa-bolt mr-1"></i> Fast & Local
-                </span>
-            </div>
+<body class="bg-slate-100 min-h-screen py-10 px-4">
+    <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-6 text-white text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform -skew-y-6 origin-top-left"></div>
+            <h1 class="text-3xl font-bold relative z-10">Pro Video Maker</h1>
+            <p class="text-indigo-200 mt-2 relative z-10">Create stunning videos with music & captions right in your browser.</p>
         </div>
 
-        <!-- Left Column: Upload & Files -->
-        <div class="lg:col-span-1 space-y-6">
-            
-            <!-- Upload Area -->
-            <div class="bg-white rounded-2xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold mb-4 border-b pb-2"><i class="fa-solid fa-cloud-arrow-up mr-2 text-indigo-500"></i>Upload Images</h2>
-                
-                <div class="flex items-center justify-center w-full">
-                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-40 border-2 border-indigo-300 border-dashed rounded-xl cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-500 mb-3"></i>
-                            <p class="mb-2 text-sm text-slate-600 font-medium">Click to upload or drag & drop</p>
-                            <p class="text-xs text-slate-500">PNG, JPG, JPEG</p>
+        <div class="flex flex-col lg:flex-row">
+            <!-- Left Panel: Uploads & Preview -->
+            <div class="lg:w-1/2 p-8 border-b lg:border-b-0 lg:border-r border-slate-200">
+                <!-- Image Upload -->
+                <h2 class="text-xl font-semibold mb-4 text-slate-700 flex items-center"><span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3">1</span> Upload Images</h2>
+                <div class="border-3 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer bg-slate-50" onclick="document.getElementById('image-upload').click()">
+                    <input type="file" id="image-upload" multiple accept="image/*" class="hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <p class="text-slate-600 font-medium">Drop your images here or click to browse.</p>
+                    <p class="text-sm text-slate-400 mt-2">Supports JPG, PNG, etc.</p>
+                </div>
+                <div id="image-list" class="mt-6 space-y-3 max-h-64 overflow-y-auto p-1">
+                    <!-- Uploaded images will appear here -->
+                </div>
+
+                <!-- Audio Upload (New) -->
+                <h2 class="text-xl font-semibold mb-4 mt-8 text-slate-700 flex items-center"><span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3">2</span> Add Background Music</h2>
+                 <div class="border-2 border-slate-300 rounded-xl p-4 flex items-center bg-slate-50">
+                    <input type="file" id="audio-upload" accept="audio/*" class="hidden" onchange="updateAudioLabel()">
+                    <button onclick="document.getElementById('audio-upload').click()" class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors flex items-center mr-4">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                        Select Audio
+                    </button>
+                    <span id="audio-label" class="text-slate-500 truncate">No audio selected (optional)</span>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls & Output -->
+            <div class="lg:w-1/2 p-8 bg-slate-50 relative">
+                 <!-- Tutorial Box -->
+                 <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-6 shadow-sm">
+                    <h3 class="text-blue-800 font-bold mb-2 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>How to Write the Script</h3>
+                    <p class="text-sm text-blue-700 mb-2">Format: <code>Image Name : Duration (sec) : Caption Text</code></p>
+                    <ul class="list-disc list-inside text-sm text-blue-700 space-y-1 ml-2">
+                        <li>Tip: Use unique parts of filenames (e.g., just "holiday" for "my_holiday_pic.jpg").</li>
+                        <li>New: Add a caption at the end for stylish text on video!</li>
+                    </ul>
+                    <p class="text-xs text-blue-500 mt-2 font-mono bg-blue-100 p-2 rounded">Example:<br>intro : 3 : Welcome to my video!<br>scene1 : 5<br>ending_pic : 4 : Thanks for watching.</p>
+                </div>
+
+                <h2 class="text-xl font-semibold mb-4 text-slate-700 flex items-center"><span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3">3</span> Video Script & Settings</h2>
+
+                <!-- Resolution Select -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-600 mb-2">Video Quality (Resolution)</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button id="res-sd" class="resolution-btn active-res p-3 rounded-xl border-2 text-center font-semibold transition-all">SD <span class="block text-xs font-normal opacity-70">480p</span></button>
+                        <button id="res-hd" class="resolution-btn p-3 rounded-xl border-2 text-center font-semibold transition-all">HD <span class="block text-xs font-normal opacity-70">720p</span></button>
+                        <button id="res-fhd" class="resolution-btn p-3 rounded-xl border-2 text-center font-semibold transition-all">FHD <span class="block text-xs font-normal opacity-70">1080p</span></button>
+                    </div>
+                </div>
+
+                <!-- Code Input -->
+                <label class="block text-sm font-medium text-slate-600 mb-2">Your Script</label>
+                <textarea id="code-input" rows="8" class="w-full p-4 border-2 border-slate-300 rounded-xl font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm" placeholder="image1 : 5 : First caption...&#10;image2 : 3&#10;image3 : 4 : Final thought..."></textarea>
+                <p id="error-message" class="text-red-500 text-sm mt-2 hidden flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg><span id="error-text"></span></p>
+
+                <!-- Action Buttons -->
+                 <div class="mt-6">
+                    <button id="generate-btn" class="w-full bg-indigo-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        Generate Video
+                    </button>
+                     <!-- Progress Bar -->
+                    <div id="progress-container" class="hidden mt-4">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-indigo-700" id="progress-status">Recording...</span>
+                            <span class="text-sm font-medium text-indigo-700" id="progress-percentage">0%</span>
                         </div>
-                        <input id="dropzone-file" type="file" class="hidden" multiple accept="image/*" />
-                    </label>
-                </div>
-            </div>
-
-            <!-- Uploaded Files List -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 flex flex-col h-[350px]">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-lg font-semibold"><i class="fa-solid fa-images mr-2 text-indigo-500"></i>Uploaded Files</h2>
-                    <span id="file-count" class="text-xs font-bold bg-slate-200 text-slate-700 px-2 py-1 rounded-full">0</span>
-                </div>
-                
-                <div id="file-list" class="flex-1 overflow-y-auto space-y-2 pr-2">
-                    <!-- Files will be injected here via JS -->
-                    <div class="text-center text-slate-400 mt-10 text-sm">
-                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
-                        No images uploaded yet.
-                    </div>
-                </div>
-                
-                <button id="clear-files-btn" class="mt-4 w-full py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors hidden">
-                    <i class="fa-solid fa-trash-can mr-2"></i>Clear All
-                </button>
-            </div>
-        </div>
-
-        <!-- Right Column: Code Input, Tutorial & Action -->
-        <div class="lg:col-span-2 space-y-6">
-            
-            <!-- Tutorial Section -->
-            <div class="bg-white rounded-2xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold mb-3 border-b pb-2"><i class="fa-solid fa-book-open mr-2 text-indigo-500"></i>How to format your code</h2>
-                
-                <div class="bg-slate-50 rounded-lg p-4 text-sm border border-slate-200">
-                    <p class="mb-3 text-slate-700">Write instructions line by line. Each line represents a frame in your video.</p>
-                    <p class="font-semibold text-slate-800 mb-1">Format:</p>
-                    <code class="block bg-slate-800 text-green-400 p-3 rounded-md mb-3 font-mono text-xs shadow-inner">
-                        [image_filename.ext] : [duration_in_seconds]
-                    </code>
-                    
-                    <p class="font-semibold text-slate-800 mb-1">Example:</p>
-                    <div class="bg-slate-800 text-slate-300 p-3 rounded-md font-mono text-xs shadow-inner mb-3">
-                        <span class="text-yellow-300">image1.jpg</span> : <span class="text-blue-300">3</span><br>
-                        <span class="text-yellow-300">photo_2.png</span> : <span class="text-blue-300">1.5</span><br>
-                        <span class="text-yellow-300">intro.jpg</span> : <span class="text-blue-300">5</span>
-                    </div>
-                    
-                    <div class="flex items-start text-xs text-amber-700 bg-amber-50 p-3 rounded border border-amber-200">
-                        <i class="fa-solid fa-circle-info mt-0.5 mr-2"></i>
-                        <div>
-                            <strong>Smart Guessing:</strong> You don't need to type the exact long name! If your image is <code>Image136373838.jpeg</code>, typing <code>image1.jpeg</code> or just <code>image1</code> will automatically guess and match it.
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                            <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Code Input Section -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-lg font-semibold"><i class="fa-solid fa-code mr-2 text-indigo-500"></i>Sequence Script</h2>
-                    <button id="copy-btn" class="text-slate-500 hover:text-indigo-600 transition-colors" title="Copy format example">
-                        <i class="fa-regular fa-copy"></i>
-                    </button>
-                </div>
-                
-                <textarea id="script-input" class="flex-1 w-full p-4 border border-slate-300 rounded-xl bg-slate-50 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none resize-none shadow-inner" placeholder="Enter your script here...&#10;Example:&#10;pic1.jpg : 2&#10;pic2.png : 3.5"></textarea>
-                
-                <!-- Action Area -->
-                <div class="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-4 items-center justify-between">
-                    <div class="flex items-center text-sm text-slate-600">
-                        <span class="font-medium mr-2">Resolution:</span>
-                        <select id="resolution-select" class="bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-indigo-500 focus:border-indigo-500 block p-1.5">
-                            <option value="640x480">640x480 (SD)</option>
-                            <option value="1280x720" selected>1280x720 (HD)</option>
-                            <option value="1920x1080">1920x1080 (FHD)</option>
-                        </select>
-                    </div>
-
-                    <button id="generate-btn" class="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Video
-                    </button>
-                </div>
+                 <!-- Hidden Canvas for processing -->
+                 <canvas id="video-canvas" class="hidden"></canvas>
             </div>
         </div>
     </div>
-
-    <!-- Processing Modal -->
-    <div id="processing-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 text-center">
-            
-            <div id="loading-state">
-                <i class="fa-solid fa-compact-disc text-5xl text-indigo-600 animate-spin-slow mb-4 block"></i>
-                <h3 class="text-2xl font-bold text-slate-800 mb-2">Processing Video</h3>
-                <p id="status-message" class="text-slate-500 mb-6 text-sm">Initializing FFmpeg core...</p>
-                
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-2 dark:bg-gray-700 overflow-hidden">
-                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <p id="progress-text" class="text-xs text-slate-500 font-medium text-right">0%</p>
-                
-                <div class="mt-6 p-3 bg-blue-50 text-blue-700 rounded-lg text-xs border border-blue-100 flex items-start text-left">
-                    <i class="fa-solid fa-circle-info mt-0.5 mr-2 shrink-0"></i>
-                    <span>This happens entirely in your browser. Large images or long videos might take some time. Please don't close this tab.</span>
-                </div>
-            </div>
-
-            <div id="success-state" class="hidden">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-check text-3xl text-green-500"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800 mb-2">Video Ready!</h3>
-                <p class="text-slate-500 mb-6 text-sm">Your video has been generated successfully.</p>
-                
-                <div class="flex gap-3 justify-center">
-                    <button id="download-btn" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition-colors flex items-center">
-                        <i class="fa-solid fa-download mr-2"></i> Download MP4
-                    </button>
-                    <button id="close-modal-btn" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors">
-                        Close
-                    </button>
-                </div>
-            </div>
-            
-            <div id="error-state" class="hidden">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Error Occurred</h3>
-                <p id="error-message" class="text-red-500 mb-6 text-sm">Something went wrong.</p>
-                
-                <button id="close-error-btn" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors">
-                    Close
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center p-4 mb-4 text-slate-500 bg-white rounded-lg shadow border border-slate-200" role="alert">
-        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-indigo-500 bg-indigo-100 rounded-lg">
-            <i class="fa-solid fa-info"></i>
-        </div>
-        <div id="toast-message" class="ms-3 text-sm font-normal">Message here.</div>
-    </div>
-
-    <!-- Load FFmpeg.wasm library (Using jsdelivr for better CORS handling) -->
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
 
     <script>
-        // Store uploaded files globally
-        const uploadedFiles = new Map();
-        
-        // DOM Elements
-        const fileInput = document.getElementById('dropzone-file');
-        const fileList = document.getElementById('file-list');
-        const fileCount = document.getElementById('file-count');
-        const clearFilesBtn = document.getElementById('clear-files-btn');
-        const scriptInput = document.getElementById('script-input');
-        const generateBtn = document.getElementById('generate-btn');
-        const resolutionSelect = document.getElementById('resolution-select');
-        
-        // Modal Elements
-        const modal = document.getElementById('processing-modal');
-        const loadingState = document.getElementById('loading-state');
-        const successState = document.getElementById('success-state');
-        const errorState = document.getElementById('error-state');
-        const statusMessage = document.getElementById('status-message');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const errorMessage = document.getElementById('error-message');
-        const downloadBtn = document.getElementById('download-btn');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const closeErrorBtn = document.getElementById('close-error-btn');
+        let uploadedImages = [];
+        let selectedResolution = { width: 854, height: 480 }; // Default SD
+        const resolutions = {
+            'res-sd': { width: 854, height: 480 },
+            'res-hd': { width: 1280, height: 720 },
+            'res-fhd': { width: 1920, height: 1080 }
+        };
 
-        let finalVideoUrl = null;
+        // --- Event Listeners ---
+        document.getElementById('image-upload').addEventListener('change', handleImageUpload);
+        document.getElementById('generate-btn').addEventListener('click', generateVideo);
 
-        // Initialize FFmpeg (v0.12 API)
-        const { FFmpeg } = window.FFmpegWASM;
-        const ffmpeg = new FFmpeg();
-
-        // --- File Upload Logic ---
-        fileInput.addEventListener('change', handleFiles);
-
-        // Drag and drop support
-        const dropZone = document.querySelector('label[for="dropzone-file"]').parentElement;
-        
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('ring-4', 'ring-indigo-300', 'rounded-xl');
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('ring-4', 'ring-indigo-300', 'rounded-xl');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('ring-4', 'ring-indigo-300', 'rounded-xl');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFiles();
-            }
-        });
-
-        function handleFiles() {
-            const files = fileInput.files;
-            if (files.length === 0) return;
-
-            let addedCount = 0;
-            for (const file of files) {
-                if (file.type.startsWith('image/')) {
-                    // Check if file with same name exists, if so, append timestamp
-                    let filename = file.name;
-                    if (uploadedFiles.has(filename)) {
-                         const nameParts = filename.split('.');
-                         const ext = nameParts.pop();
-                         filename = `${nameParts.join('.')}_${Date.now()}.${ext}`;
-                    }
-                    uploadedFiles.set(filename, file);
-                    addedCount++;
-                }
-            }
-
-            if (addedCount > 0) {
-                showToast(`Added ${addedCount} image(s)`, 'success');
-                updateFileListUI();
-                
-                // Pre-fill script if empty and files were added
-                if(scriptInput.value.trim() === '') {
-                    let defaultScript = "";
-                    let count = 0;
-                    for(const [name, _] of uploadedFiles.entries()) {
-                        defaultScript += `${name} : 2\n`; // Default 2 seconds per image
-                        count++;
-                        if(count >= 5) break; // Just fill first 5 to not overwhelm
-                    }
-                    if(uploadedFiles.size > 5) defaultScript += "// ... add more files here";
-                    scriptInput.value = defaultScript;
-                }
-            }
-            
-            // Reset input so same files can be selected again if cleared
-            fileInput.value = ''; 
-        }
-
-        function updateFileListUI() {
-            fileCount.textContent = uploadedFiles.size;
-            
-            if (uploadedFiles.size === 0) {
-                fileList.innerHTML = `
-                    <div class="text-center text-slate-400 mt-10 text-sm">
-                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
-                        No images uploaded yet.
-                    </div>`;
-                clearFilesBtn.classList.add('hidden');
-                return;
-            }
-
-            clearFilesBtn.classList.remove('hidden');
-            fileList.innerHTML = '';
-
-            for (const [filename, file] of uploadedFiles.entries()) {
-                const size = (file.size / 1024).toFixed(1) + ' KB';
-                
-                // Create object URL for small preview
-                const objUrl = URL.createObjectURL(file);
-
-                const item = document.createElement('div');
-                item.className = 'file-list-item flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg group';
-                item.innerHTML = `
-                    <div class="flex items-center space-x-3 overflow-hidden">
-                        <div class="w-10 h-10 rounded overflow-hidden shrink-0 bg-slate-200">
-                            <img src="${objUrl}" alt="preview" class="w-full h-full object-cover">
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-slate-700 truncate" title="${filename}">${filename}</p>
-                            <p class="text-xs text-slate-500">${size}</p>
-                        </div>
-                    </div>
-                    <button class="text-slate-400 hover:text-red-500 p-2 shrink-0 transition-colors" onclick="removeFile('${filename}')" title="Remove">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                `;
-                fileList.appendChild(item);
-                
-                // Note: ObjectURLs should ideally be revoked to save memory, 
-                // but for this simple app we'll let the browser handle it on reload
-            }
-        }
-
-        window.removeFile = function(filename) {
-            if (uploadedFiles.has(filename)) {
-                uploadedFiles.delete(filename);
-                updateFileListUI();
-                showToast(`Removed ${filename}`, 'info');
-            }
-        }
-
-        clearFilesBtn.addEventListener('click', () => {
-            uploadedFiles.clear();
-            updateFileListUI();
-            scriptInput.value = '';
-            showToast('All files cleared', 'info');
-        });
-
-
-        // --- UI Helpers ---
-        document.getElementById('copy-btn').addEventListener('click', () => {
-            const format = "image1.jpg : 3\nimage2.png : 1.5";
-            navigator.clipboard.writeText(format).then(() => {
-                showToast('Format example copied!', 'success');
-            }).catch(err => {
-                // Fallback for older browsers / iframe issues
-                const textArea = document.createElement("textarea");
-                textArea.value = format;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast('Format example copied!', 'success');
-                } catch (ex) {
-                    showToast('Failed to copy', 'error');
-                }
-                document.body.removeChild(textArea);
+        Object.keys(resolutions).forEach(id => {
+            document.getElementById(id).addEventListener('click', function() {
+                document.querySelectorAll('.resolution-btn').forEach(btn => btn.classList.remove('active-res', 'border-indigo-500', 'bg-indigo-50', 'text-indigo-700'));
+                this.classList.add('active-res', 'border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+                selectedResolution = resolutions[id];
             });
         });
 
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const iconEl = document.getElementById('toast-icon');
-            
-            msgEl.textContent = message;
-            
-            iconEl.className = 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg';
-            if (type === 'success') {
-                iconEl.classList.add('text-green-500', 'bg-green-100');
-                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
-            } else if (type === 'error') {
-                iconEl.classList.add('text-red-500', 'bg-red-100');
-                iconEl.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        // Initialize default resolution style
+        document.getElementById('res-sd').click();
+
+        function updateAudioLabel() {
+            const audioInput = document.getElementById('audio-upload');
+            const label = document.getElementById('audio-label');
+            if (audioInput.files.length > 0) {
+                label.textContent = audioInput.files[0].name;
+                label.classList.add('text-indigo-600', 'font-medium');
             } else {
-                iconEl.classList.add('text-indigo-500', 'bg-indigo-100');
-                iconEl.innerHTML = '<i class="fa-solid fa-info"></i>';
+                label.textContent = "No audio selected (optional)";
+                label.classList.remove('text-indigo-600', 'font-medium');
             }
+        }
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
+
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            const imageList = document.getElementById('image-list');
             
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
 
-        function showModal(state) {
-            modal.classList.remove('hidden');
-            loadingState.classList.add('hidden');
-            successState.classList.add('hidden');
-            errorState.classList.add('hidden');
-
-            if (state === 'loading') loadingState.classList.remove('hidden');
-            if (state === 'success') successState.classList.remove('hidden');
-            if (state === 'error') errorState.classList.remove('hidden');
-        }
-
-        function hideModal() {
-            modal.classList.add('hidden');
-        }
-        
-        closeModalBtn.addEventListener('click', hideModal);
-        closeErrorBtn.addEventListener('click', hideModal);
-
-        function updateProgress(percent, msg) {
-            progressBar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
-            progressText.textContent = `${Math.round(percent)}%`;
-            if (msg) statusMessage.textContent = msg;
-        }
-
-
-        // --- Video Generation Logic (FFmpeg) ---
-        
-        function findMatchingFile(inputName, uploadedFilesMap) {
-            if (uploadedFilesMap.has(inputName)) return inputName; // Exact match
-
-            const getBase = (name) => {
-                const lastDot = name.lastIndexOf('.');
-                return lastDot === -1 ? name : name.substring(0, lastDot);
-            };
-
-            const inputLower = inputName.toLowerCase().trim();
-            const inputBase = getBase(inputLower);
-            const cleanInputBase = inputBase.replace(/[^a-z0-9]/g, '');
-
-            let fallbackMatch = null;
-
-            for (const actualName of uploadedFilesMap.keys()) {
-                const actualLower = actualName.toLowerCase();
-                const actualBase = getBase(actualLower);
-                const cleanActualBase = actualBase.replace(/[^a-z0-9]/g, '');
-
-                // 1. Case-insensitive exact match
-                if (actualLower === inputLower) return actualName;
-                // 2. Base name match without extension
-                if (actualBase === inputBase) return actualName;
-                // 3. Prefix match (e.g. "image1" matches "image136373838")
-                if (actualBase.startsWith(inputBase)) return actualName;
-                // 4. Clean prefix match ignoring symbols
-                if (cleanInputBase.length > 1 && cleanActualBase.startsWith(cleanInputBase)) return actualName;
-                
-                // 5. General Includes match (fallback)
-                if (cleanInputBase.length > 2 && cleanActualBase.includes(cleanInputBase)) {
-                    if (!fallbackMatch) fallbackMatch = actualName;
-                }
-            }
-            
-            return fallbackMatch;
-        }
-
-        function parseScript(script) {
-            const lines = script.split('\n');
-            const sequence = [];
-            const errors = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                // Ignore empty lines and comments
-                if (!line || line.startsWith('//') || line.startsWith('#')) continue;
-
-                const parts = line.split(':').map(p => p.trim());
-                
-                if (parts.length !== 2) {
-                    errors.push(`Line ${i + 1}: Invalid format. Expected "filename : duration"`);
-                    continue;
+                // Check for duplicates based on name and size to avoid redundant uploads
+                if (uploadedImages.some(img => img.file.name === file.name && img.file.size === file.size)) {
+                    return; 
                 }
 
-                const rawFilename = parts[0];
-                const duration = parseFloat(parts[1]);
-
-                if (isNaN(duration) || duration <= 0) {
-                    errors.push(`Line ${i + 1}: Invalid duration "${parts[1]}". Must be a positive number.`);
-                    continue;
-                }
-
-                const matchedFilename = findMatchingFile(rawFilename, uploadedFiles);
-
-                if (!matchedFilename) {
-                    errors.push(`Line ${i + 1}: Could not find any uploaded image matching "${rawFilename}".`);
-                    continue;
-                }
-
-                sequence.push({ filename: matchedFilename, duration });
-            }
-
-            return { sequence, errors };
-        }
-
-        generateBtn.addEventListener('click', async () => {
-            const script = scriptInput.value;
-            if (!script.trim()) {
-                showToast("Please enter a script to generate video.", "error");
-                return;
-            }
-
-            const { sequence, errors } = parseScript(script);
-
-            if (errors.length > 0) {
-                // Show first error
-                showToast(errors[0], "error");
-                return;
-            }
-
-            if (sequence.length === 0) {
-                showToast("No valid instructions found in script.", "error");
-                return;
-            }
-
-            let ffmpegLog = "Started...";
-            ffmpeg.on('log', ({ message }) => {
-                console.log(message);
-                ffmpegLog = message;
-            });
-            
-            try {
-                showModal('loading');
-                updateProgress(0, "Loading FFmpeg core...");
-                
-                generateBtn.disabled = true;
-
-                // 1. Load FFmpeg - The Correct Way
-                if (!ffmpeg.loaded) {
-                    const coreBase = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-                    const workerURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js';
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImages.push({ file: file, dataUrl: e.target.result, name: file.name.toLowerCase() });
                     
+                    // Add to UI list
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm animate-fade-in";
+                    div.innerHTML = `
+                        <div class="flex items-center overflow-hidden">
+                            <img src="${e.target.result}" class="w-12 h-12 object-cover rounded-lg mr-3 border border-slate-200">
+                            <span class="text-sm font-medium text-slate-700 truncate" title="${file.name}">${file.name}</span>
+                        </div>
+                        <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full ml-2 whitespace-nowrap">${(file.size / 1024).toFixed(1)} KB</span>
+                    `;
+                    imageList.appendChild(div);
+                    // Auto-scroll to bottom
+                    imageList.scrollTop = imageList.scrollHeight;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function showError(msg) {
+            const errorBox = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            errorText.textContent = msg;
+            errorBox.classList.remove('hidden');
+            // Hide error after 5 seconds
+            setTimeout(() => {
+                errorBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        function updateProgress(percent, statusText) {
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const progressStatus = document.getElementById('progress-status');
+
+            progressContainer.classList.remove('hidden');
+            // Ensure percentage is between 0 and 100
+            const safePercent = Math.min(Math.max(percent, 0), 100);
+            progressBar.style.width = `${safePercent}%`;
+            progressPercentage.textContent = `${Math.round(safePercent)}%`;
+            if(statusText) progressStatus.textContent = statusText;
+        }
+
+        function resetUI() {
+             document.getElementById('progress-container').classList.add('hidden');
+             document.getElementById('generate-btn').disabled = false;
+             document.getElementById('progress-bar').style.width = '0%';
+        }
+
+        function parseScript(scriptText) {
+            const lines = scriptText.split('\n');
+            const timeline = [];
+            let totalDuration = 0;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line || line.startsWith('#')) continue;
+
+                // New format: name : duration : caption (optional)
+                const parts = line.split(':').map(p => p.trim());
+                const namePart = parts[0];
+                const durationPart = parts[1];
+                const captionPart = parts.length > 2 ? parts.slice(2).join(':').trim() : null; // Join back captions that might contain ':'
+
+                if (!namePart || !durationPart) {
+                    throw new Error(`Invalid line format: "${line}". Needs "name : duration"`);
+                }
+
+                const duration = parseFloat(durationPart);
+                if (isNaN(duration) || duration <= 0) {
+                     throw new Error(`Invalid duration in line: "${line}". Must be a positive number.`);
+                }
+
+                // Find matching image (fuzzy search)
+                const matchedImage = uploadedImages.find(img => img.name.includes(namePart.toLowerCase()));
+
+                if (!matchedImage) {
+                     throw new Error(`Image not found for name: "${namePart}". Please upload it first.`);
+                }
+
+                timeline.push({
+                    image: matchedImage,
+                    duration: duration,
+                    caption: captionPart
+                });
+                totalDuration += duration;
+            }
+            return { timeline, totalDuration };
+        }
+
+        async function generateVideo() {
+            const scriptText = document.getElementById('code-input').value;
+            const generateBtn = document.getElementById('generate-btn');
+            const audioInput = document.getElementById('audio-upload');
+
+            if (uploadedImages.length === 0) {
+                showError("Please upload some images first.");
+                return;
+            }
+            if (!scriptText.trim()) {
+                showError("Please write a script in the box.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            document.getElementById('error-message').classList.add('hidden');
+            updateProgress(0, "Preparing assets...");
+
+            try {
+                const { timeline, totalDuration } = parseScript(scriptText);
+                if (timeline.length === 0) throw new Error("Script yields no images to process.");
+
+                const canvas = document.getElementById('video-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = selectedResolution.width;
+                canvas.height = selectedResolution.height;
+
+                // --- Load all images first ---
+                updateProgress(5, "Loading images into memory...");
+                const loadedImages = await Promise.all(timeline.map(item => {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => resolve({ ...item, imgElement: img });
+                        img.onerror = () => reject(new Error(`Failed to load image: ${item.image.file.name}`));
+                        img.src = item.image.dataUrl;
+                    });
+                }));
+
+
+                // --- Audio Setup ---
+                let audioTrack = null;
+                let audioContext = null;
+                if (audioInput.files.length > 0) {
+                    updateProgress(10, "Processing audio...");
                     try {
-                        // SIRF Worker ko local banayenge taaki CORS (Browser Security) ka error na aaye
-                        const workerRes = await fetch(workerURL);
-                        if (!workerRes.ok) throw new Error(`Failed to fetch worker: ${workerRes.status}`);
-                        const workerCode = await workerRes.text();
-                        const workerBlobURL = URL.createObjectURL(new Blob([workerCode], { type: 'text/javascript' }));
-
-                        // Core files directly link se load hongi, isliye 'failed to import' wala error ab nahi aayega!
-                        await ffmpeg.load({
-                            coreURL: `${coreBase}/ffmpeg-core.js`,
-                            wasmURL: `${coreBase}/ffmpeg-core.wasm`,
-                            classWorkerURL: workerBlobURL
-                        });
-                    } catch (loadErr) {
-                        throw new Error(`Engine Download Failed: ${loadErr.message || loadErr}`);
-                    }
-                }
-                
-                updateProgress(10, "Preparing files...");
-
-                // 2. Write files to FFmpeg Virtual File System (MEMFS)
-                // We rename them to safe names (img_1.jpg) to prevent spaces/symbols from breaking FFmpeg
-                const usedFiles = new Set();
-                const safeNameMap = new Map();
-                let imgCounter = 1;
-
-                for (let i = 0; i < sequence.length; i++) {
-                    const { filename } = sequence[i];
-                    if (!safeNameMap.has(filename)) {
-                        const file = uploadedFiles.get(filename);
-                        const ext = filename.split('.').pop() || 'jpg';
-                        const safeName = `img_${imgCounter++}.${ext}`;
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioFile = audioInput.files[0];
+                        const arrayBuffer = await audioFile.arrayBuffer();
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                         
-                        safeNameMap.set(filename, safeName);
-                        usedFiles.add(safeName);
+                        const source = audioContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.loop = true; // Loop audio if video is longer
 
-                        // Native ArrayBuffer fetch (No third-party util needed, crash-proof)
-                        const fileData = new Uint8Array(await file.arrayBuffer());
-                        await ffmpeg.writeFile(safeName, fileData);
+                        const destination = audioContext.createMediaStreamDestination();
+                        source.connect(destination);
+                        source.start();
+                        audioTrack = destination.stream.getAudioTracks()[0];
+                    } catch (e) {
+                         console.error("Audio processing failed:", e);
+                         showError("Failed to process audio file. Video will be generated without audio.");
+                         // Continue without audio
                     }
-                    updateProgress(10 + (i / sequence.length) * 10, `Preparing ${filename}...`);
                 }
 
-                updateProgress(25, "Creating instruction list...");
 
-                // 3. Create FFmpeg concat demuxer file
-                let concatText = '';
-                for (const item of sequence) {
-                    const safeName = safeNameMap.get(item.filename);
-                    concatText += `file '${safeName}'\n`;
-                    concatText += `duration ${item.duration}\n`;
-                }
+                // --- Setup Recorder ---
+                updateProgress(15, "Starting recording...");
+                const canvasStream = canvas.captureStream(30); // 30 FPS
                 
-                if (sequence.length > 0) {
-                    const lastSafeName = safeNameMap.get(sequence[sequence.length - 1].filename);
-                    concatText += `file '${lastSafeName}'\n`;
+                // Combine video and audio tracks if audio exists
+                const combinedTracks = [...canvasStream.getVideoTracks()];
+                if (audioTrack) {
+                    combinedTracks.push(audioTrack);
                 }
-
-                await ffmpeg.writeFile('input.txt', new TextEncoder().encode(concatText));
-
-                updateProgress(30, "Generating video (this takes time)...");
+                const combinedStream = new MediaStream(combinedTracks);
                 
-                const resValue = resolutionSelect.value;
-                const [width, height] = resValue.split('x');
+                // Prefer vp9 for better compression, fallback to vp8 or default
+                const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+                let selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || 'video/webm';
 
-                // Track progress
-                ffmpeg.on('progress', ({ progress, time }) => {
-                    const p = 30 + (progress * 65);
-                    if(!isNaN(p) && p >= 30 && p <= 95) {
-                        updateProgress(p, "Rendering frames...");
-                    }
+                const mediaRecorder = new MediaRecorder(combinedStream, {
+                    mimeType: selectedMimeType,
+                    videoBitsPerSecond: selectedResolution.height >= 1080 ? 5000000 : 2500000 // Higher bitrate for higher res
                 });
                 
-                const vfFilter = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`;
-                
-                // 4. Run FFmpeg command
-                const exitCode = await ffmpeg.exec([
-                    '-f', 'concat', 
-                    '-safe', '0', 
-                    '-i', 'input.txt', 
-                    '-vf', vfFilter,
-                    '-c:v', 'libx264', 
-                    '-pix_fmt', 'yuv420p',
-                    '-r', '30',
-                    'output.mp4'
-                ]);
+                const chunks = [];
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
 
-                if (exitCode !== 0) {
-                     throw new Error(`Video rendering crashed. Last log: ${ffmpegLog}`);
+                mediaRecorder.onstop = () => {
+                    updateProgress(100, "Finalizing video...");
+                    const blob = new Blob(chunks, { type: selectedMimeType });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Ensure filename ends with .webm
+                    a.download = `video_${new Date().getTime()}.webm`; 
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    if (audioContext) audioContext.close(); // Cleanup audio context
+                    resetUI();
+                };
+
+
+                // --- Animation Loop ---
+                mediaRecorder.start();
+                let startTime = null;
+                let currentItemIndex = 0;
+                const transitionDuration = 1.0; // 1 second fade transition
+
+                function drawFrame(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = (timestamp - startTime) / 1000; // seconds
+
+                    // Calculate current position in the timeline
+                    let timeCovered = 0;
+                    let activeItem = null;
+                    let nextItem = null;
+                    let timeIntoCurrentItem = 0;
+
+                    for (let i = 0; i < loadedImages.length; i++) {
+                        if (elapsed < timeCovered + loadedImages[i].duration) {
+                            activeItem = loadedImages[i];
+                            nextItem = loadedImages[i+1] || null;
+                            timeIntoCurrentItem = elapsed - timeCovered;
+                            currentItemIndex = i;
+                            break;
+                        }
+                        timeCovered += loadedImages[i].duration;
+                    }
+
+                    if (activeItem) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // Fill background with black
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(0,0, canvas.width, canvas.height);
+
+                        // --- Image Drawing with 'object-fit: contain' style ---
+                        function drawContainedImage(img, opacity = 1.0) {
+                             ctx.globalAlpha = opacity;
+                             const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                             const x = (canvas.width / 2) - (img.width / 2) * scale;
+                             const y = (canvas.height / 2) - (img.height / 2) * scale;
+                             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                             ctx.globalAlpha = 1.0; // Reset opacity
+                        }
+
+                        const timeRemaining = activeItem.duration - timeIntoCurrentItem;
+                        
+                        // --- Handle Transition ---
+                        if (nextItem && timeRemaining <= transitionDuration) {
+                            // Fade out current, fade in next
+                            const transitionProgress = 1 - (timeRemaining / transitionDuration); // 0 to 1
+                            drawContainedImage(activeItem.imgElement); // Draw current base
+                            drawContainedImage(nextItem.imgElement, transitionProgress); // Draw next on top with increasing opacity
+                        } else {
+                            // Normal drawing
+                            drawContainedImage(activeItem.imgElement);
+                        }
+
+
+                        // --- Stylish Captions ---
+                        if (activeItem.caption) {
+                            const fontSize = Math.max(24, canvas.height / 20); // Responsive font size
+                            ctx.font = `bold ${fontSize}px Poppins, sans-serif`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillStyle = '#FFFFFF'; // White text
+                            
+                            // Add shadow for better readability
+                            ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                            ctx.shadowBlur = fontSize / 5;
+                            ctx.shadowOffsetX = fontSize / 15;
+                            ctx.shadowOffsetY = fontSize / 15;
+                            
+                            // Draw text with padding from bottom
+                            const paddingBottom = canvas.height / 15;
+                            ctx.fillText(activeItem.caption, canvas.width / 2, canvas.height - paddingBottom);
+                            
+                            // Reset shadow
+                            ctx.shadowColor = 'transparent';
+                            ctx.shadowBlur = 0;
+                            ctx.shadowOffsetX = 0;
+                            ctx.shadowOffsetY = 0;
+                        }
+
+
+                        // Update progress bar based on recording time
+                        const progress = (elapsed / totalDuration) * 100;
+                        // cap progress at 99% until strictly finished
+                        updateProgress(Math.min(progress, 99), `Recording: ${Math.round(elapsed)}s / ${totalDuration}s`);
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        // Finished
+                        console.log("Recording finished. Stopping...");
+                        mediaRecorder.stop();
+                    }
                 }
 
-                updateProgress(98, "Finalizing file...");
+                requestAnimationFrame(drawFrame);
 
-                // 5. Read result
-                const data = await ffmpeg.readFile('output.mp4');
-                
-                // Create URL
-                if (finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
-                const blob = new Blob([data.buffer], { type: 'video/mp4' });
-                finalVideoUrl = URL.createObjectURL(blob);
-
-                updateProgress(100, "Done!");
-                
-                // Show Success
-                setTimeout(() => {
-                    showModal('success');
-                    generateBtn.disabled = false;
-                }, 500);
-
-                // Cleanup MEMFS to save memory
-                try {
-                    await ffmpeg.deleteFile('input.txt');
-                    await ffmpeg.deleteFile('output.mp4');
-                    for (const f of usedFiles) {
-                        await ffmpeg.deleteFile(f);
-                    }
-                } catch(e) { console.warn("Cleanup error", e); }
-
-            } catch (err) {
-                console.error("FFmpeg Error:", err);
-                
-                let errMsg = err.message || "Unknown error occurred during processing.";
-                errorMessage.textContent = errMsg;
-                showModal('error');
-                generateBtn.disabled = false;
+            } catch (error) {
+                showError(error.message);
+                resetUI();
+                console.error(error);
             }
-        });
-
-        downloadBtn.addEventListener('click', () => {
-            if (!finalVideoUrl) return;
-            
-            const a = document.createElement('a');
-            a.href = finalVideoUrl;
-            a.download = `sequence_${Date.now()}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            showToast("Download started!", "success");
-        });
-
+        }
     </script>
+    <style>
+    /* Custom styles for active states and animations */
+    .active-res {
+        @apply border-indigo-500 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+    </style>
 </body>
 </html>
-```
