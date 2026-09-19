@@ -1,0 +1,694 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Video Builder</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        .file-list-item {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .file-list-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(2px);
+        }
+
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Animation for loading spinner */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Header Section (Spans full width) -->
+        <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-6 mb-2 flex items-center justify-between border-t-4 border-indigo-600">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                    <i class="fa-solid fa-film text-indigo-600"></i>
+                    Img2Vid Creator
+                </h1>
+                <p class="text-slate-500 mt-1">Convert your images into a video sequence right in your browser.</p>
+            </div>
+            <div class="hidden md:block">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-3 py-1 rounded-full border border-indigo-200">
+                    <i class="fa-solid fa-bolt mr-1"></i> Fast & Local
+                </span>
+            </div>
+        </div>
+
+        <!-- Left Column: Upload & Files -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- Upload Area -->
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold mb-4 border-b pb-2"><i class="fa-solid fa-cloud-arrow-up mr-2 text-indigo-500"></i>Upload Images</h2>
+                
+                <div class="flex items-center justify-center w-full">
+                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-40 border-2 border-indigo-300 border-dashed rounded-xl cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-500 mb-3"></i>
+                            <p class="mb-2 text-sm text-slate-600 font-medium">Click to upload or drag & drop</p>
+                            <p class="text-xs text-slate-500">PNG, JPG, JPEG</p>
+                        </div>
+                        <input id="dropzone-file" type="file" class="hidden" multiple accept="image/*" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Uploaded Files List -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 flex flex-col h-[350px]">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-lg font-semibold"><i class="fa-solid fa-images mr-2 text-indigo-500"></i>Uploaded Files</h2>
+                    <span id="file-count" class="text-xs font-bold bg-slate-200 text-slate-700 px-2 py-1 rounded-full">0</span>
+                </div>
+                
+                <div id="file-list" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                    <!-- Files will be injected here via JS -->
+                    <div class="text-center text-slate-400 mt-10 text-sm">
+                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                        No images uploaded yet.
+                    </div>
+                </div>
+                
+                <button id="clear-files-btn" class="mt-4 w-full py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors hidden">
+                    <i class="fa-solid fa-trash-can mr-2"></i>Clear All
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Code Input, Tutorial & Action -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Tutorial Section -->
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold mb-3 border-b pb-2"><i class="fa-solid fa-book-open mr-2 text-indigo-500"></i>How to format your code</h2>
+                
+                <div class="bg-slate-50 rounded-lg p-4 text-sm border border-slate-200">
+                    <p class="mb-3 text-slate-700">Write instructions line by line. Each line represents a frame in your video.</p>
+                    <p class="font-semibold text-slate-800 mb-1">Format:</p>
+                    <code class="block bg-slate-800 text-green-400 p-3 rounded-md mb-3 font-mono text-xs shadow-inner">
+                        [image_filename.ext] : [duration_in_seconds]
+                    </code>
+                    
+                    <p class="font-semibold text-slate-800 mb-1">Example:</p>
+                    <div class="bg-slate-800 text-slate-300 p-3 rounded-md font-mono text-xs shadow-inner mb-3">
+                        <span class="text-yellow-300">image1.jpg</span> : <span class="text-blue-300">3</span><br>
+                        <span class="text-yellow-300">photo_2.png</span> : <span class="text-blue-300">1.5</span><br>
+                        <span class="text-yellow-300">intro.jpg</span> : <span class="text-blue-300">5</span>
+                    </div>
+                    
+                    <div class="flex items-start text-xs text-amber-700 bg-amber-50 p-3 rounded border border-amber-200">
+                        <i class="fa-solid fa-circle-info mt-0.5 mr-2"></i>
+                        <div>
+                            <strong>Smart Guessing:</strong> You don't need to type the exact long name! If your image is <code>Image136373838.jpeg</code>, typing <code>image1.jpeg</code> or just <code>image1</code> will automatically guess and match it.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Input Section -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-lg font-semibold"><i class="fa-solid fa-code mr-2 text-indigo-500"></i>Sequence Script</h2>
+                    <button id="copy-btn" class="text-slate-500 hover:text-indigo-600 transition-colors" title="Copy format example">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+                
+                <textarea id="script-input" class="flex-1 w-full p-4 border border-slate-300 rounded-xl bg-slate-50 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none resize-none shadow-inner" placeholder="Enter your script here...&#10;Example:&#10;pic1.jpg : 2&#10;pic2.png : 3.5"></textarea>
+                
+                <!-- Action Area -->
+                <div class="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div class="flex items-center text-sm text-slate-600">
+                        <span class="font-medium mr-2">Resolution:</span>
+                        <select id="resolution-select" class="bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-indigo-500 focus:border-indigo-500 block p-1.5">
+                            <option value="640x480">640x480 (SD)</option>
+                            <option value="1280x720" selected>1280x720 (HD)</option>
+                            <option value="1920x1080">1920x1080 (FHD)</option>
+                        </select>
+                    </div>
+
+                    <button id="generate-btn" class="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Video
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="processing-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 text-center">
+            
+            <div id="loading-state">
+                <i class="fa-solid fa-compact-disc text-5xl text-indigo-600 animate-spin-slow mb-4 block"></i>
+                <h3 class="text-2xl font-bold text-slate-800 mb-2">Processing Video</h3>
+                <p id="status-message" class="text-slate-500 mb-6 text-sm">Initializing FFmpeg core...</p>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-2 dark:bg-gray-700 overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-xs text-slate-500 font-medium text-right">0%</p>
+                
+                <div class="mt-6 p-3 bg-blue-50 text-blue-700 rounded-lg text-xs border border-blue-100 flex items-start text-left">
+                    <i class="fa-solid fa-circle-info mt-0.5 mr-2 shrink-0"></i>
+                    <span>This happens entirely in your browser. Large images or long videos might take some time. Please don't close this tab.</span>
+                </div>
+            </div>
+
+            <div id="success-state" class="hidden">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-check text-3xl text-green-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-2">Video Ready!</h3>
+                <p class="text-slate-500 mb-6 text-sm">Your video has been generated successfully.</p>
+                
+                <div class="flex gap-3 justify-center">
+                    <button id="download-btn" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition-colors flex items-center">
+                        <i class="fa-solid fa-download mr-2"></i> Download MP4
+                    </button>
+                    <button id="close-modal-btn" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+            
+            <div id="error-state" class="hidden">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Error Occurred</h3>
+                <p id="error-message" class="text-red-500 mb-6 text-sm">Something went wrong.</p>
+                
+                <button id="close-error-btn" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center p-4 mb-4 text-slate-500 bg-white rounded-lg shadow border border-slate-200" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-indigo-500 bg-indigo-100 rounded-lg">
+            <i class="fa-solid fa-info"></i>
+        </div>
+        <div id="toast-message" class="ms-3 text-sm font-normal">Message here.</div>
+    </div>
+
+    <!-- Load FFmpeg.wasm library (Using unpkg which handles CORS blob conversion perfectly) -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
+    <script>
+        // Store uploaded files globally
+        const uploadedFiles = new Map();
+        
+        // DOM Elements
+        const fileInput = document.getElementById('dropzone-file');
+        const fileList = document.getElementById('file-list');
+        const fileCount = document.getElementById('file-count');
+        const clearFilesBtn = document.getElementById('clear-files-btn');
+        const scriptInput = document.getElementById('script-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const resolutionSelect = document.getElementById('resolution-select');
+        
+        // Modal Elements
+        const modal = document.getElementById('processing-modal');
+        const loadingState = document.getElementById('loading-state');
+        const successState = document.getElementById('success-state');
+        const errorState = document.getElementById('error-state');
+        const statusMessage = document.getElementById('status-message');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const errorMessage = document.getElementById('error-message');
+        const downloadBtn = document.getElementById('download-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const closeErrorBtn = document.getElementById('close-error-btn');
+
+        let finalVideoUrl = null;
+
+        // Initialize FFmpeg (v0.12 API)
+        const { FFmpeg } = window.FFmpegWASM;
+        const { fetchFile, toBlobURL } = window.FFmpegUtil;
+        const ffmpeg = new FFmpeg();
+
+        // --- File Upload Logic ---
+        fileInput.addEventListener('change', handleFiles);
+
+        // Drag and drop support
+        const dropZone = document.querySelector('label[for="dropzone-file"]').parentElement;
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ring-4', 'ring-indigo-300', 'rounded-xl');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ring-4', 'ring-indigo-300', 'rounded-xl');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ring-4', 'ring-indigo-300', 'rounded-xl');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFiles();
+            }
+        });
+
+        function handleFiles() {
+            const files = fileInput.files;
+            if (files.length === 0) return;
+
+            let addedCount = 0;
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    // Check if file with same name exists, if so, append timestamp
+                    let filename = file.name;
+                    if (uploadedFiles.has(filename)) {
+                         const nameParts = filename.split('.');
+                         const ext = nameParts.pop();
+                         filename = `${nameParts.join('.')}_${Date.now()}.${ext}`;
+                    }
+                    uploadedFiles.set(filename, file);
+                    addedCount++;
+                }
+            }
+
+            if (addedCount > 0) {
+                showToast(`Added ${addedCount} image(s)`, 'success');
+                updateFileListUI();
+                
+                // Pre-fill script if empty and files were added
+                if(scriptInput.value.trim() === '') {
+                    let defaultScript = "";
+                    let count = 0;
+                    for(const [name, _] of uploadedFiles.entries()) {
+                        defaultScript += `${name} : 2\n`; // Default 2 seconds per image
+                        count++;
+                        if(count >= 5) break; // Just fill first 5 to not overwhelm
+                    }
+                    if(uploadedFiles.size > 5) defaultScript += "// ... add more files here";
+                    scriptInput.value = defaultScript;
+                }
+            }
+            
+            // Reset input so same files can be selected again if cleared
+            fileInput.value = ''; 
+        }
+
+        function updateFileListUI() {
+            fileCount.textContent = uploadedFiles.size;
+            
+            if (uploadedFiles.size === 0) {
+                fileList.innerHTML = `
+                    <div class="text-center text-slate-400 mt-10 text-sm">
+                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                        No images uploaded yet.
+                    </div>`;
+                clearFilesBtn.classList.add('hidden');
+                return;
+            }
+
+            clearFilesBtn.classList.remove('hidden');
+            fileList.innerHTML = '';
+
+            for (const [filename, file] of uploadedFiles.entries()) {
+                const size = (file.size / 1024).toFixed(1) + ' KB';
+                
+                // Create object URL for small preview
+                const objUrl = URL.createObjectURL(file);
+
+                const item = document.createElement('div');
+                item.className = 'file-list-item flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg group';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded overflow-hidden shrink-0 bg-slate-200">
+                            <img src="${objUrl}" alt="preview" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-slate-700 truncate" title="${filename}">${filename}</p>
+                            <p class="text-xs text-slate-500">${size}</p>
+                        </div>
+                    </div>
+                    <button class="text-slate-400 hover:text-red-500 p-2 shrink-0 transition-colors" onclick="removeFile('${filename}')" title="Remove">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                fileList.appendChild(item);
+                
+                // Note: ObjectURLs should ideally be revoked to save memory, 
+                // but for this simple app we'll let the browser handle it on reload
+            }
+        }
+
+        window.removeFile = function(filename) {
+            if (uploadedFiles.has(filename)) {
+                uploadedFiles.delete(filename);
+                updateFileListUI();
+                showToast(`Removed ${filename}`, 'info');
+            }
+        }
+
+        clearFilesBtn.addEventListener('click', () => {
+            uploadedFiles.clear();
+            updateFileListUI();
+            scriptInput.value = '';
+            showToast('All files cleared', 'info');
+        });
+
+
+        // --- UI Helpers ---
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const format = "image1.jpg : 3\nimage2.png : 1.5";
+            navigator.clipboard.writeText(format).then(() => {
+                showToast('Format example copied!', 'success');
+            }).catch(err => {
+                // Fallback for older browsers / iframe issues
+                const textArea = document.createElement("textarea");
+                textArea.value = format;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Format example copied!', 'success');
+                } catch (ex) {
+                    showToast('Failed to copy', 'error');
+                }
+                document.body.removeChild(textArea);
+            });
+        });
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            
+            msgEl.textContent = message;
+            
+            iconEl.className = 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg';
+            if (type === 'success') {
+                iconEl.classList.add('text-green-500', 'bg-green-100');
+                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if (type === 'error') {
+                iconEl.classList.add('text-red-500', 'bg-red-100');
+                iconEl.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            } else {
+                iconEl.classList.add('text-indigo-500', 'bg-indigo-100');
+                iconEl.innerHTML = '<i class="fa-solid fa-info"></i>';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function showModal(state) {
+            modal.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+            successState.classList.add('hidden');
+            errorState.classList.add('hidden');
+
+            if (state === 'loading') loadingState.classList.remove('hidden');
+            if (state === 'success') successState.classList.remove('hidden');
+            if (state === 'error') errorState.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            modal.classList.add('hidden');
+        }
+        
+        closeModalBtn.addEventListener('click', hideModal);
+        closeErrorBtn.addEventListener('click', hideModal);
+
+        function updateProgress(percent, msg) {
+            progressBar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+            progressText.textContent = `${Math.round(percent)}%`;
+            if (msg) statusMessage.textContent = msg;
+        }
+
+
+        // --- Video Generation Logic (FFmpeg) ---
+        
+        function findMatchingFile(inputName, uploadedFilesMap) {
+            if (uploadedFilesMap.has(inputName)) return inputName; // Exact match
+
+            const getBase = (name) => {
+                const lastDot = name.lastIndexOf('.');
+                return lastDot === -1 ? name : name.substring(0, lastDot);
+            };
+
+            const inputLower = inputName.toLowerCase().trim();
+            const inputBase = getBase(inputLower);
+            const cleanInputBase = inputBase.replace(/[^a-z0-9]/g, '');
+
+            let fallbackMatch = null;
+
+            for (const actualName of uploadedFilesMap.keys()) {
+                const actualLower = actualName.toLowerCase();
+                const actualBase = getBase(actualLower);
+                const cleanActualBase = actualBase.replace(/[^a-z0-9]/g, '');
+
+                // 1. Case-insensitive exact match
+                if (actualLower === inputLower) return actualName;
+                // 2. Base name match without extension
+                if (actualBase === inputBase) return actualName;
+                // 3. Prefix match (e.g. "image1" matches "image136373838")
+                if (actualBase.startsWith(inputBase)) return actualName;
+                // 4. Clean prefix match ignoring symbols
+                if (cleanInputBase.length > 1 && cleanActualBase.startsWith(cleanInputBase)) return actualName;
+                
+                // 5. General Includes match (fallback)
+                if (cleanInputBase.length > 2 && cleanActualBase.includes(cleanInputBase)) {
+                    if (!fallbackMatch) fallbackMatch = actualName;
+                }
+            }
+            
+            return fallbackMatch;
+        }
+
+        function parseScript(script) {
+            const lines = script.split('\n');
+            const sequence = [];
+            const errors = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                // Ignore empty lines and comments
+                if (!line || line.startsWith('//') || line.startsWith('#')) continue;
+
+                const parts = line.split(':').map(p => p.trim());
+                
+                if (parts.length !== 2) {
+                    errors.push(`Line ${i + 1}: Invalid format. Expected "filename : duration"`);
+                    continue;
+                }
+
+                const rawFilename = parts[0];
+                const duration = parseFloat(parts[1]);
+
+                if (isNaN(duration) || duration <= 0) {
+                    errors.push(`Line ${i + 1}: Invalid duration "${parts[1]}". Must be a positive number.`);
+                    continue;
+                }
+
+                const matchedFilename = findMatchingFile(rawFilename, uploadedFiles);
+
+                if (!matchedFilename) {
+                    errors.push(`Line ${i + 1}: Could not find any uploaded image matching "${rawFilename}".`);
+                    continue;
+                }
+
+                sequence.push({ filename: matchedFilename, duration });
+            }
+
+            return { sequence, errors };
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            const script = scriptInput.value;
+            if (!script.trim()) {
+                showToast("Please enter a script to generate video.", "error");
+                return;
+            }
+
+            const { sequence, errors } = parseScript(script);
+
+            if (errors.length > 0) {
+                // Show first error
+                showToast(errors[0], "error");
+                return;
+            }
+
+            if (sequence.length === 0) {
+                showToast("No valid instructions found in script.", "error");
+                return;
+            }
+            
+            try {
+                showModal('loading');
+                updateProgress(0, "Loading FFmpeg core...");
+                
+                generateBtn.disabled = true;
+
+                // 1. Load FFmpeg if not loaded (Using toBlobURL to fix Worker & CORS issues)
+                if (!ffmpeg.loaded) {
+                    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+                    await ffmpeg.load({
+                        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
+                    });
+                }
+                
+                updateProgress(10, "Preparing files...");
+
+                // 2. Write files to FFmpeg Virtual File System (MEMFS)
+                const usedFiles = new Set();
+                for (let i = 0; i < sequence.length; i++) {
+                    const { filename } = sequence[i];
+                    if (!usedFiles.has(filename)) {
+                        const file = uploadedFiles.get(filename);
+                        const fileData = await fetchFile(file);
+                        await ffmpeg.writeFile(filename, fileData);
+                        usedFiles.add(filename);
+                    }
+                    updateProgress(10 + (i / sequence.length) * 10, `Preparing ${filename}...`);
+                }
+
+                updateProgress(25, "Creating instruction list...");
+
+                // 3. Create FFmpeg concat demuxer file
+                let concatText = '';
+                for (const item of sequence) {
+                    concatText += `file '${item.filename}'\n`;
+                    concatText += `duration ${item.duration}\n`;
+                }
+                
+                if (sequence.length > 0) {
+                    concatText += `file '${sequence[sequence.length - 1].filename}'\n`;
+                }
+
+                await ffmpeg.writeFile('input.txt', new TextEncoder().encode(concatText));
+
+                updateProgress(30, "Generating video (this takes time)...");
+                
+                const resValue = resolutionSelect.value;
+                const [width, height] = resValue.split('x');
+
+                // Track progress
+                ffmpeg.on('progress', ({ progress, time }) => {
+                    const p = 30 + (progress * 65);
+                    if(!isNaN(p) && p >= 30 && p <= 95) {
+                        updateProgress(p, "Rendering frames...");
+                    }
+                });
+                
+                const vfFilter = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`;
+                
+                // 4. Run FFmpeg command
+                await ffmpeg.exec([
+                    '-f', 'concat', 
+                    '-safe', '0', 
+                    '-i', 'input.txt', 
+                    '-vf', vfFilter,
+                    '-c:v', 'libx264', 
+                    '-pix_fmt', 'yuv420p',
+                    '-r', '30',
+                    'output.mp4'
+                ]);
+
+                updateProgress(98, "Finalizing file...");
+
+                // 5. Read result
+                const data = await ffmpeg.readFile('output.mp4');
+                
+                // Create URL
+                if (finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
+                const blob = new Blob([data.buffer], { type: 'video/mp4' });
+                finalVideoUrl = URL.createObjectURL(blob);
+
+                updateProgress(100, "Done!");
+                
+                // Show Success
+                setTimeout(() => {
+                    showModal('success');
+                    generateBtn.disabled = false;
+                }, 500);
+
+                // Cleanup MEMFS to save memory
+                try {
+                    await ffmpeg.deleteFile('input.txt');
+                    for (const f of usedFiles) {
+                        await ffmpeg.deleteFile(f);
+                    }
+                } catch(e) { console.warn("Cleanup error", e); }
+
+            } catch (err) {
+                console.error("FFmpeg Error:", err);
+                
+                let errMsg = err.message || "Unknown error occurred during processing.";
+                
+                errorMessage.textContent = errMsg;
+                showModal('error');
+                generateBtn.disabled = false;
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!finalVideoUrl) return;
+            
+            const a = document.createElement('a');
+            a.href = finalVideoUrl;
+            a.download = `sequence_${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showToast("Download started!", "success");
+        });
+
+    </script>
+</body>
+</html>
