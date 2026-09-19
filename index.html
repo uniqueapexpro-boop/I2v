@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -234,9 +234,9 @@
         <div id="toast-message" class="ms-3 text-sm font-normal">Message here.</div>
     </div>
 
-    <!-- Load FFmpeg.wasm library (Using unpkg which handles CORS blob conversion perfectly) -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+    <!-- Load FFmpeg.wasm library (Using jsdelivr for better CORS handling) -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
 
     <script>
         // Store uploaded files globally
@@ -268,7 +268,6 @@
 
         // Initialize FFmpeg (v0.12 API)
         const { FFmpeg } = window.FFmpegWASM;
-        const { fetchFile, toBlobURL } = window.FFmpegUtil;
         const ffmpeg = new FFmpeg();
 
         // --- File Upload Logic ---
@@ -566,6 +565,12 @@
                 showToast("No valid instructions found in script.", "error");
                 return;
             }
+
+            let ffmpegLog = "Started...";
+            ffmpeg.on('log', ({ message }) => {
+                console.log(message);
+                ffmpegLog = message;
+            });
             
             try {
                 showModal('loading');
@@ -573,26 +578,50 @@
                 
                 generateBtn.disabled = true;
 
-                // 1. Load FFmpeg if not loaded (Using toBlobURL to fix Worker & CORS issues)
+                // 1. Load FFmpeg - The Correct Way
                 if (!ffmpeg.loaded) {
-                    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-                    await ffmpeg.load({
-                        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-                        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
-                    });
+                    const coreBase = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+                    const workerURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js';
+                    
+                    try {
+                        // SIRF Worker ko local banayenge taaki CORS (Browser Security) ka error na aaye
+                        const workerRes = await fetch(workerURL);
+                        if (!workerRes.ok) throw new Error(`Failed to fetch worker: ${workerRes.status}`);
+                        const workerCode = await workerRes.text();
+                        const workerBlobURL = URL.createObjectURL(new Blob([workerCode], { type: 'text/javascript' }));
+
+                        // Core files directly link se load hongi, isliye 'failed to import' wala error ab nahi aayega!
+                        await ffmpeg.load({
+                            coreURL: `${coreBase}/ffmpeg-core.js`,
+                            wasmURL: `${coreBase}/ffmpeg-core.wasm`,
+                            classWorkerURL: workerBlobURL
+                        });
+                    } catch (loadErr) {
+                        throw new Error(`Engine Download Failed: ${loadErr.message || loadErr}`);
+                    }
                 }
                 
                 updateProgress(10, "Preparing files...");
 
                 // 2. Write files to FFmpeg Virtual File System (MEMFS)
+                // We rename them to safe names (img_1.jpg) to prevent spaces/symbols from breaking FFmpeg
                 const usedFiles = new Set();
+                const safeNameMap = new Map();
+                let imgCounter = 1;
+
                 for (let i = 0; i < sequence.length; i++) {
                     const { filename } = sequence[i];
-                    if (!usedFiles.has(filename)) {
+                    if (!safeNameMap.has(filename)) {
                         const file = uploadedFiles.get(filename);
-                        const fileData = await fetchFile(file);
-                        await ffmpeg.writeFile(filename, fileData);
-                        usedFiles.add(filename);
+                        const ext = filename.split('.').pop() || 'jpg';
+                        const safeName = `img_${imgCounter++}.${ext}`;
+                        
+                        safeNameMap.set(filename, safeName);
+                        usedFiles.add(safeName);
+
+                        // Native ArrayBuffer fetch (No third-party util needed, crash-proof)
+                        const fileData = new Uint8Array(await file.arrayBuffer());
+                        await ffmpeg.writeFile(safeName, fileData);
                     }
                     updateProgress(10 + (i / sequence.length) * 10, `Preparing ${filename}...`);
                 }
@@ -602,12 +631,14 @@
                 // 3. Create FFmpeg concat demuxer file
                 let concatText = '';
                 for (const item of sequence) {
-                    concatText += `file '${item.filename}'\n`;
+                    const safeName = safeNameMap.get(item.filename);
+                    concatText += `file '${safeName}'\n`;
                     concatText += `duration ${item.duration}\n`;
                 }
                 
                 if (sequence.length > 0) {
-                    concatText += `file '${sequence[sequence.length - 1].filename}'\n`;
+                    const lastSafeName = safeNameMap.get(sequence[sequence.length - 1].filename);
+                    concatText += `file '${lastSafeName}'\n`;
                 }
 
                 await ffmpeg.writeFile('input.txt', new TextEncoder().encode(concatText));
@@ -628,7 +659,7 @@
                 const vfFilter = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`;
                 
                 // 4. Run FFmpeg command
-                await ffmpeg.exec([
+                const exitCode = await ffmpeg.exec([
                     '-f', 'concat', 
                     '-safe', '0', 
                     '-i', 'input.txt', 
@@ -638,6 +669,10 @@
                     '-r', '30',
                     'output.mp4'
                 ]);
+
+                if (exitCode !== 0) {
+                     throw new Error(`Video rendering crashed. Last log: ${ffmpegLog}`);
+                }
 
                 updateProgress(98, "Finalizing file...");
 
@@ -660,6 +695,7 @@
                 // Cleanup MEMFS to save memory
                 try {
                     await ffmpeg.deleteFile('input.txt');
+                    await ffmpeg.deleteFile('output.mp4');
                     for (const f of usedFiles) {
                         await ffmpeg.deleteFile(f);
                     }
@@ -669,7 +705,6 @@
                 console.error("FFmpeg Error:", err);
                 
                 let errMsg = err.message || "Unknown error occurred during processing.";
-                
                 errorMessage.textContent = errMsg;
                 showModal('error');
                 generateBtn.disabled = false;
@@ -692,3 +727,4 @@
     </script>
 </body>
 </html>
+```
